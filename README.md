@@ -2,6 +2,8 @@
 
 一个基于 Vulkan 的 3D 渲染引擎，实现了基于物理的渲染（PBR）管线。学习使用。
 
+<img src="assets/1.jpg" width="100%" />
+
 ## 特性
 
 - **现代 Vulkan API**: 使用 Vulkan-Hpp 绑定，遵循现代 C++17 标准
@@ -194,7 +196,7 @@ MIT License
 
 ## 作者
 
-Created with ❤️ using Vulkan and C++17
+Created with ❤️ using Vulkan and C++23
 
 ---
 
