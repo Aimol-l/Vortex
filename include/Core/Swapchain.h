@@ -5,9 +5,6 @@
 #include "Core/Window.h"
 
 class SwapchainManager {
-
-static const uint32_t MAX_FRAMES_IN_FLIGHT = 3;
-
 public:
     SwapchainManager(Context* context, Window* window);
     ~SwapchainManager(){

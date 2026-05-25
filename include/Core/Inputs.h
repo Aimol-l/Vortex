@@ -51,10 +51,6 @@ private:
     bool m_wasLeftButtonPressed = false;  // 用于检测左键按下/释放
 
 public:
-    using Key = int;
-    using MouseButton = int;
-
-public:
     explicit Inputs(GLFWwindow* window);
     ~Inputs() = default;
 
@@ -67,14 +63,14 @@ public:
     void update();
 
     // 键盘状态查询
-    bool isKeyPressed(Key key) const;
-    bool isKeyJustPressed(Key key) const;
-    bool isKeyJustReleased(Key key) const;
+    bool isKeyPressed(int key) const;
+    bool isKeyJustPressed(int key) const;
+    bool isKeyJustReleased(int key) const;
 
     // 鼠标按钮状态查询
-    bool isMouseButtonPressed(MouseButton button) const;
-    bool isMouseButtonJustPressed(MouseButton button) const;
-    bool isMouseButtonJustReleased(MouseButton button) const;
+    bool isMouseButtonPressed(int button) const;
+    bool isMouseButtonJustPressed(int button) const;
+    bool isMouseButtonJustReleased(int button) const;
 
     // 鼠标位置查询
     glm::vec2 getMousePosition() const;

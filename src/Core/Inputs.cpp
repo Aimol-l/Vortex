@@ -1,4 +1,5 @@
 #include "Core/Inputs.h"
+#include <imgui.h>
 #include <GLFW/glfw3.h>
 
 Inputs::Inputs(GLFWwindow* window)
@@ -22,6 +23,18 @@ void Inputs::update() {
     for (int i = 0; i < GLFW_MOUSE_BUTTON_LAST; ++i) {
         m_currentMouseButtons[i] = (glfwGetMouseButton(m_window, i) == GLFW_PRESS);
     }
+
+    // ImGui 捕获输入时，跳过游戏输入
+    auto& io = ImGui::GetIO();
+    if (io.WantCaptureMouse || io.WantCaptureKeyboard) {
+        if (m_cursorCaptured) {
+            setCursorMode(GLFW_CURSOR_NORMAL);
+            m_cursorCaptured = false;
+            m_mouseDelta = glm::vec2(0.0f);
+        }
+        return;
+    }
+
     // 更新鼠标捕获状态（左键控制）
     updateCursorCapture();
     // 更新鼠标位置和增量（只在捕获模式下计算增量）
@@ -73,32 +86,32 @@ void Inputs::updateMouseDelta() {
     }
 }
 
-bool Inputs::isKeyPressed(Key key) const {
+bool Inputs::isKeyPressed(int key) const {
     if (key < 0 || key >= GLFW_KEY_LAST) return false;
     return m_currentKeys[key];
 }
 
-bool Inputs::isKeyJustPressed(Key key) const {
+bool Inputs::isKeyJustPressed(int key) const {
     if (key < 0 || key >= GLFW_KEY_LAST) return false;
     return m_currentKeys[key] && !m_prevKeys[key];
 }
 
-bool Inputs::isKeyJustReleased(Key key) const {
+bool Inputs::isKeyJustReleased(int key) const {
     if (key < 0 || key >= GLFW_KEY_LAST) return false;
     return !m_currentKeys[key] && m_prevKeys[key];
 }
 
-bool Inputs::isMouseButtonPressed(MouseButton button) const {
+bool Inputs::isMouseButtonPressed(int button) const {
     if (button < 0 || button >= GLFW_MOUSE_BUTTON_LAST) return false;
     return m_currentMouseButtons[button];
 }
 
-bool Inputs::isMouseButtonJustPressed(MouseButton button) const {
+bool Inputs::isMouseButtonJustPressed(int button) const {
     if (button < 0 || button >= GLFW_MOUSE_BUTTON_LAST) return false;
     return m_currentMouseButtons[button] && !m_prevMouseButtons[button];
 }
 
-bool Inputs::isMouseButtonJustReleased(MouseButton button) const {
+bool Inputs::isMouseButtonJustReleased(int button) const {
     if (button < 0 || button >= GLFW_MOUSE_BUTTON_LAST) return false;
     return !m_currentMouseButtons[button] && m_prevMouseButtons[button];
 }

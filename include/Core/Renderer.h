@@ -13,6 +13,7 @@
 #include "Core/Pipeline.h"
 #include "Core/Descriptor.h"
 #include "Core/Command.h"
+#include "Core/ImGuiManager.h"
 #include <vulkan/vulkan.hpp>
 
 
@@ -21,7 +22,7 @@ concept ValidUBO = std::is_trivially_copyable_v<T> && requires { sizeof(T) > 0; 
 
 class Renderer {
 public:
-    bool m_framebufferResized = false;
+    void markFramebufferResized() { m_framebufferResized = true; }
     // --- 构造与析构 ---
     explicit Renderer(std::unique_ptr<Window>& window);
     ~Renderer();
@@ -40,10 +41,12 @@ public:
     Context* getContext() {
         return m_context.get();
     }
+    ImGuiManager* getImGuiManager() { return m_imguiManager.get(); }
     DescriptorManager* getDescriptorManager() {
         return m_descriptorManager.get();
     }
 private:
+    bool m_framebufferResized = false;
     static constexpr int MAX_FRAMES_IN_FLIGHT = 2; // 提交的最大帧数
     // --- 核心组件 ---
     std::unique_ptr<Context> m_context;
@@ -52,6 +55,7 @@ private:
     std::unique_ptr<PipelineManager> m_pipelineManager;
     std::unique_ptr<CommandManager> m_commandManager;
     std::unique_ptr<DescriptorManager> m_descriptorManager; // 负责创建和管理布局、池、集
+    std::unique_ptr<ImGuiManager> m_imguiManager;
 
     // --- 帧相关资源 ---
     vk::Image m_depthImage = nullptr; 

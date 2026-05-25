@@ -1,4 +1,6 @@
 #include "Core/Renderer.h"
+#include <imgui_impl_vulkan.h>
+#include <print>
 
 Renderer::Renderer(std::unique_ptr<Window>& window) {
     // 1. 创建上下文 (实例、设备等)
@@ -64,6 +66,16 @@ Renderer::Renderer(std::unique_ptr<Window>& window) {
         m_context.get(),
         MAX_FRAMES_IN_FLIGHT,       //2
         static_cast<uint32_t>(m_swapchain->getImageCount()) // 3
+    );
+
+    // 11. 初始化 ImGui
+    m_imguiManager = std::make_unique<ImGuiManager>();
+    m_imguiManager->init(
+        m_context.get(),
+        window->getGLFWwindow(),
+        m_mainRenderPass->getRenderPass(),
+        m_swapchain->getImageFormat(),
+        static_cast<uint32_t>(m_swapchain->getImageCount())
     );
 }
 std::unique_ptr<RenderPassManager> Renderer::createMainRenderPass(vk::Format color, vk::Format depth) {
@@ -236,6 +248,7 @@ void Renderer::updateObjectUBO(size_t objIdx, const TransformUBO& trans, const L
     vmaMapMemory(m_context->getVmaAllocator(), m_objectAllocations[objIdx * 3 + 2], &matData);
     memcpy(matData, &mat, sizeof(MaterialUBO));
     vmaUnmapMemory(m_context->getVmaAllocator(), m_objectAllocations[objIdx * 3 + 2]);
+    // std::println("metallic={},roughness={},ao={}",mat.metallic,mat.roughness,mat.ao);
 }
 void Renderer::createFrameUBOs() {
     m_frameUBOs.camera.resize(MAX_FRAMES_IN_FLIGHT);
@@ -279,7 +292,8 @@ Renderer::~Renderer() {
     // 按依赖关系逆序清理资源
     // 智能指针会自动清理，但我们按顺序重置以确保正确的销毁顺序
     // ============================================================
-    // 1. 清理 PipelineManager (依赖 renderPass, descriptorLayouts)
+    // 1. 清理 ImGui
+    m_imguiManager.reset();
     m_pipelineManager.reset();
     // 2. 清理 CommandManager (fences, semaphores, command pools)
     m_commandManager.reset();
@@ -293,7 +307,7 @@ Renderer::~Renderer() {
     m_descriptorManager.reset();
     // 7. 清理 RenderPass
     m_mainRenderPass.reset();
-    // 8. 清理 UBOs (uniform buffers)
+    // 8. 清理 UBOs (uniform buffers, 依赖 VMA allocator)
     cleanupUBOs();
     // 9. 最后清理 Context (device, instance, VMA)
     m_context.reset();
@@ -321,6 +335,9 @@ void Renderer::render(const std::unique_ptr<Scene>& scene) {
     int newHeight = m_swapchain->getExtent().height;
     scene->getCamera().setViewportSize(static_cast<int>(newWidth), static_cast<int>(newHeight));
     this->updateFrameUBO(currentFrame,scene->getCamera().getUBO()); // 具体的数值应该是在外部更新好了的，这里只复制到显存里面
+
+    // ImGui new frame (reads GLFW input state)
+    m_imguiManager->newFrame();
 
     // 3. 开始录制命令
     vk::CommandBuffer commandBuffer = m_commandManager->getCurrentCommandBuffer();
@@ -405,6 +422,9 @@ void Renderer::render(const std::unique_ptr<Scene>& scene) {
         commandBuffer.drawIndexed(mesh.getIndexCount(), 1, 0, 0, 0);
     }
 
+    // ImGui render (same render pass, draws on top of scene)
+    m_imguiManager->render(commandBuffer);
+
     commandBuffer.endRenderPass();
     commandBuffer.end();
     try {
@@ -459,6 +479,7 @@ void Renderer::recreateSwapchainAndDependencies() {
         m_descriptorManager->getAllDescriptorSetLayouts()
     );
     this->m_commandManager = std::make_unique<CommandManager>(m_context.get(),MAX_FRAMES_IN_FLIGHT,static_cast<uint32_t>(m_swapchain->getImageCount()));
+    ImGui_ImplVulkan_SetMinImageCount(static_cast<uint32_t>(m_swapchain->getImageCount()));
     this->m_framebufferResized = false;
     std::println("=== Stop swapchain recreation ===");
 }

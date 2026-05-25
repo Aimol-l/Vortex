@@ -21,6 +21,8 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include/Assets
     ${CMAKE_SOURCE_DIR}/include/Core
     ${CMAKE_SOURCE_DIR}/include/Scene
+    ${CMAKE_SOURCE_DIR}/include/3rd/imgui/include
+    ${CMAKE_SOURCE_DIR}/include/3rd/imgui/include/imgui
 )
 
 # 明确列出源文件，避免重复包含 VMA
@@ -50,6 +52,17 @@ set(SRC_FILES
     "${PROJECT_SOURCE_DIR}/src/Assets/Mesh.cpp"
     "${PROJECT_SOURCE_DIR}/src/Assets/Material.cpp"
     "${PROJECT_SOURCE_DIR}/src/Assets/Texture.cpp"
+
+    # ImGui
+    "${CMAKE_SOURCE_DIR}/include/3rd/imgui/src/imgui.cpp"
+    "${CMAKE_SOURCE_DIR}/include/3rd/imgui/src/imgui_demo.cpp"
+    "${CMAKE_SOURCE_DIR}/include/3rd/imgui/src/imgui_draw.cpp"
+    "${CMAKE_SOURCE_DIR}/include/3rd/imgui/src/imgui_impl_glfw.cpp"
+    "${CMAKE_SOURCE_DIR}/include/3rd/imgui/src/imgui_impl_vulkan.cpp"
+    "${CMAKE_SOURCE_DIR}/include/3rd/imgui/src/imgui_tables.cpp"
+    "${CMAKE_SOURCE_DIR}/include/3rd/imgui/src/imgui_widgets.cpp"
+
+    "${PROJECT_SOURCE_DIR}/src/Core/ImGuiManager.cpp"
 )
 include_directories(${PROJECT_DIR}/include)
 

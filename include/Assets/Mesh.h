@@ -2,9 +2,7 @@
 
 #include <vector>
 #include <memory>
-#include <print>
-#include <iostream>
-#include <unordered_map>
+#include <array>
 #include <glm/glm.hpp>
 #include <vulkan/vulkan.hpp>
 #include "Core/Context.h"

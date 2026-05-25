@@ -87,15 +87,10 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
 }
 
 void main() {
-    // 1. 准备材质参数（从纹理或UBO获取）
-    vec3 albedo = texture(albedoMap, fragTexCoord).rgb;
-    float metallic = texture(metallicMap, fragTexCoord).r;
-    float roughness = texture(roughnessMap, fragTexCoord).r;
-
-    // 如果纹理是纯黑或无效，使用UBO值作为后备
-    if (metallic < 0.01) metallic = material.metallic;
-    if (roughness < 0.01) roughness = material.roughness;
-
+    // 1. 准备材质参数（纹理 * UBO 参数，滑动条可实时调节）
+    vec3 albedo = texture(albedoMap, fragTexCoord).rgb * material.albedo;
+    float metallic = texture(metallicMap, fragTexCoord).r * material.metallic;
+    float roughness = texture(roughnessMap, fragTexCoord).r * material.roughness;
     float ao = material.ao;
 
     // 2. 归一化输入向量
